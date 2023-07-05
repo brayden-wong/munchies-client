@@ -1,4 +1,5 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Header, createStackNavigator } from "@react-navigation/stack";
 import {
   DarkTheme,
   DefaultTheme,
@@ -8,8 +9,14 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { useCallback, useEffect } from "react";
 import { useColorScheme } from "react-native";
-
+import { NavigationContainer } from "@react-navigation/native";
 import * as SplashScreen from "expo-splash-screen";
+import Login from "./screens/login/login";
+import ModalScreen from "./modal";
+import SignUp from "./screens/login/signup";
+import * as Linking from "expo-linking";
+import Recipe from "./screens/recipe";
+import Tabs from "./screens/tabs";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -18,7 +25,7 @@ export {
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: "(tabs)",
+  initialRouteName: "",
 };
 
 export default function RootLayout() {
@@ -75,14 +82,26 @@ function RootLayoutNav() {
 
     prepare();
   }, []);
-
+  const Stack = createStackNavigator();
+  Linking.createURL("login");
   return (
     <>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: "modal" }} />
-        </Stack>
+        <Stack.Navigator
+          screenOptions={{
+            headerShown: false,
+          }}>
+          <Stack.Screen name="screens/login/login" component={Login} />
+          <Stack.Screen
+            name="screens/login/signup"
+            component={SignUp}
+            options={{
+              title: "Reminder",
+            }}
+          />
+          <Stack.Screen name="screens/tabs/index" component={Tabs} />
+          <Stack.Screen name="modal" component={ModalScreen} />
+        </Stack.Navigator>
       </ThemeProvider>
     </>
   );
