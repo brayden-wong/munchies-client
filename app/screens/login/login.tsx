@@ -1,49 +1,80 @@
-import {
-  Button,
-  Text,
-  TextInput,
-  Image,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import React, { Component } from "react";
-import { Icon } from "react-native-elements";
-
+import { useEffect, useState } from "react";
+import { Text, TextInput, Image, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet } from "react-native";
 import { Link } from "@react-navigation/native";
+import { Icon } from "react-native-elements";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
-import fetchData from "../../../components/restService/restApi";
-import { SafeAreaView } from "react-native-safe-area-context";
-const Login = ({ navigation }: any) => {
-  // const params = route.route.params.type;
 
-  const [email, changeEmail] = React.useState("janedoe@gmail.com");
-  const [password, changePassword] = React.useState("****************");
-  Linking.createURL("login");
-  async function createAccount(url: string, oAuth: boolean) {
+import { API_URL } from "@env";
+import { AuthType } from "./login.types";
+
+const Login = ({ navigation, route }: any) => {
+  const [username, changeUsername] = useState("");
+  const [password, changePassword] = useState("");
+
+  useEffect(() => {
+    const handleRedirect = async (event: { url: string }) => {
+      if (event.url.startsWith("exp://")) {
+        const queryParams = event.url
+          .split("?")[1]
+          .split("&")
+          .reduce<AuthType>(
+            (prev, cur) => {
+              const [key, value] = cur.split("=");
+
+              prev[key as keyof AuthType] = value;
+              return prev;
+            },
+            {
+              at: "",
+              rt: "",
+              id: "",
+            }
+          );
+
+        console.log("from login", queryParams.at);
+
+        WebBrowser.dismissBrowser();
+
+        await AsyncStorage.setItem("at", queryParams.at);
+        await AsyncStorage.setItem("rt", queryParams.rt);
+        await AsyncStorage.setItem("userId", queryParams.id);
+
+        navigation.navigate("screens/tabs/index");
+      }
+    };
+
+    Linking.addEventListener("url", handleRedirect);
+  }, []);
+
+  const createAccount = async (url: string, oAuth: boolean) => {
     if (oAuth) {
-      openBrowser(url);
+      await openBrowser(url);
     } else {
-      const user = { email, password };
+      const user = { username: username, password };
       console.log(user);
-      await fetchData("url", "POST", user);
+      const response = await fetch(`${API_URL}/users/all`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(await response.json());
     }
-  }
-  async function openBrowser(url: any) {
-    const supported = await Linking.canOpenURL(url);
+  };
 
-    if (supported) {
-      await Linking.openURL(url);
-    } else {
-      console.error("Opening the URL in browser is not supported");
-    }
+  async function openBrowser(url: string) {
+    const response = await WebBrowser.openBrowserAsync(url);
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title} className="text-red-500">
-        Login
-      </Text>
+      <Text style={styles.title}>Login</Text>
       <Text style={styles.subtitle}>Please sign in to continue</Text>
       <View style={styles.inputs}>
         <View style={styles.searchSection}>
@@ -51,7 +82,9 @@ const Login = ({ navigation }: any) => {
           <TextInput
             style={styles.input}
             placeholder="Username or Email"
-            onChangeText={changeEmail}
+            value={username}
+            autoCapitalize="none"
+            onChangeText={changeUsername}
             placeholderTextColor="#000"
             underlineColorAndroid="transparent"
           />
@@ -59,9 +92,11 @@ const Login = ({ navigation }: any) => {
         <View style={styles.searchSection}>
           <Icon name="lock" style={styles.searchIcon} size={25} />
           <TextInput
+            className=""
             style={styles.input}
             secureTextEntry={true}
             placeholder="Password"
+            value={password}
             onChangeText={changePassword}
             placeholderTextColor="#000"
             underlineColorAndroid="transparent"
@@ -69,15 +104,18 @@ const Login = ({ navigation }: any) => {
         </View>
       </View>
       <TouchableOpacity
-        onPress={() => navigation.navigate("screens/tabs/index")}
-        style={styles.loginButton}>
+        // onPress={() => navigation.navigate("screens/tabs/index")}
+        onPress={() => createAccount("", false)}
+        style={styles.loginButton}
+      >
         <Text
           style={{
             color: "#fff",
             textAlign: "center",
             fontSize: 18,
             fontWeight: "300",
-          }}>
+          }}
+        >
           Login
         </Text>
       </TouchableOpacity>
@@ -90,8 +128,9 @@ const Login = ({ navigation }: any) => {
       <View style={styles.row}>
         <TouchableOpacity
           onPress={() => {
-            createAccount("https://127.0.0.1:8080/auth/facebook", true);
-          }}>
+            createAccount(`${API_URL}/auth/facebook`, true);
+          }}
+        >
           <Image
             style={styles.logo}
             source={{
@@ -101,8 +140,9 @@ const Login = ({ navigation }: any) => {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
-            createAccount("https://127.0.0.1:8080/auth/google", true);
-          }}>
+            createAccount(`${API_URL}/auth/google`, true);
+          }}
+        >
           <Image
             style={styles.logo}
             source={{
@@ -112,8 +152,9 @@ const Login = ({ navigation }: any) => {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
-            createAccount("https://127.0.0.1:8080/auth/discord", true);
-          }}>
+            createAccount(`${API_URL}/auth/discord`, true);
+          }}
+        >
           <Image
             style={styles.logo}
             source={{

@@ -5,6 +5,8 @@ const fetchData = async (url: string, method: string, body: {}) => {
     body: body ? JSON.stringify(body) : null,
   };
 
+  console.log(url);
+
   try {
     const response = await fetch(url, options);
     const data = await response.json();

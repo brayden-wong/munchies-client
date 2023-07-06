@@ -2,9 +2,9 @@
   "name": "client",
   "version": "1.0.0",
   "scripts": {
-    "start": "expo start -c",
+    "start": "expo start --tunnel -c",
     "android": "expo start -c --android",
-    "ios": "expo start -c --ios",
+    "ios": "expo start -c --tunnel --ios",
     "web": "expo start -c --web",
     "test": "jest --watchAll"
   },
@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^13.0.0",
+    "@react-native-async-storage/async-storage": "1.17.11",
     "@react-navigation/native": "^6.1.7",
     "@react-navigation/stack": "^6.3.17",
     "expo": "~48.0.18",
@@ -27,15 +28,17 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-native": "0.71.8",
+    "react-native-dotenv": "^3.4.9",
     "react-native-elements": "^3.4.3",
     "react-native-gesture-handler": "~2.9.0",
     "react-native-heroicons": "^3.2.0",
     "react-native-safe-area-context": "4.5.0",
     "react-native-screens": "~3.20.0",
-    "react-native-svg": "^13.9.0",
+    "react-native-svg": "13.4.0",
     "react-native-vector-icons": "^9.2.0",
     "react-native-web": "~0.18.10",
-    "react-native-webview": "^13.2.2"
+    "react-native-webview": "11.26.0",
+    "react-router-native": "^6.14.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

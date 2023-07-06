@@ -83,14 +83,15 @@ function RootLayoutNav() {
     prepare();
   }, []);
   const Stack = createStackNavigator();
-  Linking.createURL("login");
+
   return (
     <>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <Stack.Navigator
           screenOptions={{
             headerShown: false,
-          }}>
+          }}
+        >
           <Stack.Screen name="screens/login/login" component={Login} />
           <Stack.Screen
             name="screens/login/signup"
