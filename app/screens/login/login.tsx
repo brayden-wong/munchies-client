@@ -56,20 +56,36 @@ const Login = ({ navigation, route }: any) => {
       await openBrowser(url);
     } else {
       const user = { username: username, password };
-      console.log(user);
-      const response = await fetch(`${API_URL}/users/all`, {
-        method: "GET",
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
+        body: JSON.stringify(user),
       });
-      console.log(await response.json());
+
+      const { data, status, statusCode } = await response.json();
+      console.log(data, status, statusCode);
+      if (status === "ok") {
+        await AsyncStorage.setItem("at", data.at);
+        await AsyncStorage.setItem("rt", data.rt);
+        await AsyncStorage.setItem("userId", data.session.userId);
+        navigation.navigate("screens/tabs/index");
+      }
     }
   };
 
   async function openBrowser(url: string) {
-    const response = await WebBrowser.openBrowserAsync(url);
+    const response = await WebBrowser.openAuthSessionAsync(url);
+    //   dismissButtonStyle: "close",
+    //   controlsColor: "#f5f5f5",
+    //   toolbarColor: "#000",
+    // });
+
+    if (response && response.type === "cancel") {
+      console.log("cancelled by user");
+    }
   }
 
   return (

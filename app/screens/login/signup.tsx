@@ -6,20 +6,19 @@ import {
   Image,
   TouchableOpacity,
 } from "react-native";
-import React, { Component } from "react";
+import React from "react";
 import { Icon } from "react-native-elements";
 import { useNavigation } from "@react-navigation/native";
 import { StyleSheet } from "react-native";
 import { Link } from "@react-navigation/native";
-import fetchData from "../../../components/restService/restApi";
 import * as Linking from "expo-linking";
 import { SafeAreaView } from "react-native-safe-area-context";
+import axios from "axios";
 
-// Usage:
+import { API_URL } from "@env";
+import type { Response, User } from "@/types";
 
 const SignUp = ({ navigation }: any) => {
-  // const params = route.route.params.type;
-  // console.log(params);
   Linking.createURL("signup");
   async function openBrowser(url: any) {
     const supported = await Linking.canOpenURL(url);
@@ -30,16 +29,35 @@ const SignUp = ({ navigation }: any) => {
       console.error("Opening the URL in browser is not supported");
     }
   }
-  const [email, changeEmail] = React.useState("janedoe@gmail.com");
-  const [password, changePassword] = React.useState("****************");
+  const [email, changeEmail] = React.useState("");
+  const [password, changePassword] = React.useState("");
   const [username, changeUsername] = React.useState("");
+
   async function createAccount(url: string, oAuth: boolean) {
     if (oAuth) {
       openBrowser(url);
     } else {
       const user = { email, username, password };
-      console.log(user);
-      await fetchData("url", "POST", user);
+
+      const { data } = await axios.post<Response<User>>(
+        `${API_URL}/auth/register`,
+        {
+          ...user,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      );
+
+      console.log(data);
+      if (data.status === "ok") navigation.navigate("screens/login/login");
+
+      if (data.status === "error") {
+        console.log(data);
+      }
     }
   }
 
@@ -49,10 +67,12 @@ const SignUp = ({ navigation }: any) => {
         <Icon
           onPress={() => navigation.navigate("screens/login/login")}
           name="chevron-left"
-          size={25}></Icon>
+          size={25}
+        ></Icon>
         <Text
           onPress={() => navigation.navigate("screens/login/login")}
-          style={styles.backText}>
+          style={styles.backText}
+        >
           Back
         </Text>
       </View>
@@ -97,14 +117,16 @@ const SignUp = ({ navigation }: any) => {
         onPress={() => {
           createAccount("", false);
         }}
-        style={styles.loginButton}>
+        style={styles.loginButton}
+      >
         <Text
           style={{
             color: "#fff",
             textAlign: "center",
             fontSize: 18,
             fontWeight: "300",
-          }}>
+          }}
+        >
           Sign Up
         </Text>
       </TouchableOpacity>
@@ -119,7 +141,8 @@ const SignUp = ({ navigation }: any) => {
         <TouchableOpacity
           onPress={() => {
             createAccount("https://127.0.0.1:8080/auth/facebook", true);
-          }}>
+          }}
+        >
           <Image
             style={styles.logo}
             source={{
@@ -130,7 +153,8 @@ const SignUp = ({ navigation }: any) => {
         <TouchableOpacity
           onPress={() => {
             createAccount("https://127.0.0.1:8080/auth/google", true);
-          }}>
+          }}
+        >
           <Image
             style={styles.logo}
             source={{
@@ -141,7 +165,8 @@ const SignUp = ({ navigation }: any) => {
         <TouchableOpacity
           onPress={() => {
             createAccount("https://127.0.0.1:8080/auth/discord", true);
-          }}>
+          }}
+        >
           <Image
             style={styles.logo}
             source={{

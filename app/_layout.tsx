@@ -9,7 +9,6 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { useCallback, useEffect } from "react";
 import { useColorScheme } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
 import * as SplashScreen from "expo-splash-screen";
 import Login from "./screens/login/login";
 import ModalScreen from "./modal";
