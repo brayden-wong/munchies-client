@@ -4,80 +4,38 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet } from "react-native";
 import { Link } from "@react-navigation/native";
 import { Icon } from "react-native-elements";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
 
 import { API_URL } from "@env";
 import { AuthType } from "./login.types";
+import { useAuthStore } from "@stores/auth.store";
 
 const Login = ({ navigation, route }: any) => {
   const [username, changeUsername] = useState("");
   const [password, changePassword] = useState("");
 
-  useEffect(() => {
-    const handleRedirect = async (event: { url: string }) => {
-      if (event.url.startsWith("exp://")) {
-        const queryParams = event.url
-          .split("?")[1]
-          .split("&")
-          .reduce<AuthType>(
-            (prev, cur) => {
-              const [key, value] = cur.split("=");
-
-              prev[key as keyof AuthType] = value;
-              return prev;
-            },
-            {
-              at: "",
-              rt: "",
-              id: "",
-            }
-          );
-
-        console.log("from login", queryParams.at);
-
-        WebBrowser.dismissBrowser();
-
-        await AsyncStorage.setItem("at", queryParams.at);
-        await AsyncStorage.setItem("rt", queryParams.rt);
-        await AsyncStorage.setItem("userId", queryParams.id);
-
-        navigation.navigate("screens/tabs/index");
-      }
-    };
-
-    Linking.addEventListener("url", handleRedirect);
-  }, []);
+  const { login, oauthLogin } = useAuthStore();
 
   const createAccount = async (url: string, oAuth: boolean) => {
     if (oAuth) {
       await openBrowser(url);
     } else {
-      const user = { username: username, password };
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(user),
-      });
+      const response = await login(username, password);
 
-      const { data, status, statusCode } = await response.json();
-      console.log(data, status, statusCode);
-      if (status === "ok") {
-        await AsyncStorage.setItem("at", data.at);
-        await AsyncStorage.setItem("rt", data.rt);
-        await AsyncStorage.setItem("userId", data.session.userId);
-        navigation.navigate("screens/tabs/index");
-      }
+      if (response.success) navigation.navigate("screens/tabs/index");
+
+      /*
+        do something with response.message because of an error
+      */
     }
   };
 
   async function openBrowser(url: string) {
-    const response = await WebBrowser.openAuthSessionAsync(url);
+    const callback = Linking.createURL("App", { scheme: "exp" });
+    console.log(callback);
+    const response = await WebBrowser.openAuthSessionAsync(url, callback);
     //   dismissButtonStyle: "close",
     //   controlsColor: "#f5f5f5",
     //   toolbarColor: "#000",
@@ -85,6 +43,30 @@ const Login = ({ navigation, route }: any) => {
 
     if (response && response.type === "cancel") {
       console.log("cancelled by user");
+      return;
+    }
+
+    if (response.type === "success") {
+      const queryParams = response.url
+        .split("?")[1]
+        .split("&")
+        .reduce<AuthType>(
+          (prev, cur) => {
+            const [key, value] = cur.split("=");
+
+            prev[key as keyof AuthType] = value;
+            return prev;
+          },
+          {
+            at: "",
+            rt: "",
+            userId: "",
+          }
+        );
+
+      await oauthLogin({ ...queryParams });
+
+      navigation.navigate("screens/tabs/index");
     }
   }
 

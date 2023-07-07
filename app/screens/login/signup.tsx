@@ -16,7 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import axios from "axios";
 
 import { API_URL } from "@env";
-import type { Response, User } from "@/types";
+import type { Response, User } from "@utils/types";
 
 const SignUp = ({ navigation }: any) => {
   Linking.createURL("signup");
