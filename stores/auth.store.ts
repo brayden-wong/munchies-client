@@ -24,7 +24,7 @@ export type AuthStore = {
   refreshTokens: () => Promise<void>;
 };
 
-export const useAuthStore = create<AuthStore>((set) => ({
+export const useAuthStore = create<AuthStore>((set, get) => ({
   at: "",
   rt: "",
   userId: "",
@@ -71,5 +71,26 @@ export const useAuthStore = create<AuthStore>((set) => ({
     });
   },
   logout: async () => {},
-  refreshTokens: async () => {},
+  refreshTokens: async () => {
+    const rt = await AsyncStorage.getItem("rt");
+    const { data } = await axios.patch<Response<Login>>(
+      `${API_URL}/auth/refresh`,
+      {},
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${rt}`,
+        },
+      }
+    );
+
+    if (data.status === "ok") {
+      const { oauthLogin } = get();
+
+      oauthLogin({
+        ...data.data,
+      });
+    }
+  },
 }));

@@ -9,8 +9,6 @@ const Home = () => {
   return (
     <View>
       <Text>home</Text>
-      <Text>{at}</Text>
-      <Text>{rt}</Text>
       <Text>{userId}</Text>
     </View>
   );
