@@ -11,16 +11,23 @@ const Header = (props: any) => {
 
 const styles = StyleSheet.create({
   headerContainer: {
-    backgroundColor: "#FBC02D", // Choose your desired header background color
-    height: 200,
+    backgroundColor: "#ccc", // Choose your desired header background color
+    height: "10%",
+    alignSelf: "center",
     justifyContent: "center",
     alignItems: "center",
-    
+    margin: "5%",
+    borderBottomRightRadius: 640,
+    borderBottomLeftRadius: 5340,
+    borderTopRightRadius: 5650,
+    borderTopLeftRadius: 640,
+    width: "95%",
   },
   headerText: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#FFFFFF", // Choose your desired text color
+    marginLeft: "2%",
+    color: "#0b0b0b", // Choose your desired text color
     textTransform: "uppercase",
     letterSpacing: 2,
   },

@@ -49,15 +49,20 @@ const Tabs = () => {
   return (
     <SafeAreaView style={styles.container}>
       <Header title={titles[selected]}></Header>
-      <SafeAreaView>{pages[selected]}</SafeAreaView>
+      <View style={styles.content}>{pages[selected]}</View>
       <Navigation selected={selected} setSelected={setSelected}></Navigation>
     </SafeAreaView>
   );
 };
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#f3f3f3",
     height: "100%",
+    width: "100%",
+  },
+  content: {
+    height: "100%",
+    width: "100%",
   },
 });
 
