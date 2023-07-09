@@ -1,16 +1,30 @@
-import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React from "react";
-import Navigation from "../../../components/Navigation";
-import { SafeAreaView } from "react-native-safe-area-context";
 import * as Icons from "react-native-heroicons/mini";
-import { Header } from "react-native-elements";
+import React, { useState } from "react";
+import {
+  Button,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Modal,
+} from "react-native";
+import AddRecipe from "./create";
+
 export default function Recipe() {
-  const [selected, setSelected] = React.useState(1);
+  const [selected, setSelected] = useState(1);
+  const [modalVisible, setModalVisible] = useState(false);
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.icon}>
+      <TouchableOpacity
+        onPress={() => setModalVisible(true)}
+        style={styles.icon}>
         <Icons.PlusCircleIcon color={"#0b0b0b"} size={40} />
       </TouchableOpacity>
+      <AddRecipe
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+      />
     </View>
   );
 }
@@ -22,7 +36,13 @@ const styles = StyleSheet.create({
   },
   icon: {
     position: "absolute",
-    bottom: "10%",
+    bottom: "24.5%",
     right: "6%",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
 });
