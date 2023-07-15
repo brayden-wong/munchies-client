@@ -7,16 +7,17 @@ module.exports = function (api) {
       "nativewind/babel",
       ["module:react-native-dotenv", {
         "moduleName": "@env",
-        "path": ".env",
+        "path": process.env.NODE_ENV === 'development' ? `.env.development` : process.env.NODE_ENV === 'school' ? `.env.school` : `.env.production`,
         "blacklist": null,
         "whitelist": null,
-        "safe": false,
-        "allowUndefined": true
+        "safe": true,
+        "allowUndefined": false
       }],
       ["module-resolver", {
         root: ["./"],
         alias: {
           "@components": "./components",
+          "@hooks": "./hooks",
           "@screens": "./app",
           "@stores": "./stores",
           "@utils": "./utils",

@@ -2,19 +2,31 @@ import { View, Text } from "react-native";
 import React, { useEffect } from "react";
 import { useSocketStore } from "@stores/socket.store";
 import { useAuthStore } from "@stores/auth.store";
-import { Response } from "@utils/types";
+import {useRoomStore} from '@stores/room.store';
+
+import { PencilSquareIcon } from 'react-native-heroicons/solid'
 
 const Chat = () => {
   const { socket } = useSocketStore();
-  const { userId } = useAuthStore();
-  useEffect(() => {
-    socket?.on(userId, (data: Response<any>) => {
-      console.log(data);
-    });
-  });
+  const { user } = useAuthStore(); 
+  const { rooms } = useRoomStore();
+
   return (
     <View>
-      <Text>Chat</Text>
+      <View className='absolute right-4'>
+        <PencilSquareIcon color='black' size={28} />
+      </View>
+      {rooms.map((room) => (
+        <View>
+          {
+            room.users.length > 2 ? (
+              <Text></Text>
+            ) : (
+              <Text>{}</Text>
+            )
+          }
+        </View>
+      ))}
     </View>
   );
 };

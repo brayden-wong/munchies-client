@@ -24,13 +24,12 @@ const Tabs = () => {
   const titles = ["Home", "Explore", "Recipe", "Chat", "Profile"];
   const { connect, disconnect } = useSocketStore();
   const { rooms, setRooms } = useRoomStore();
-  const { userId } = useAuthStore();
+  const { user } = useAuthStore();
 
   useEffect(() => {
     const initializeSocket = async () => {
       const socket = await connect();
 
-      console.log(userId);
       socket.on("rooms", (data: Response<Rooms>) => {
         if (data.status === "ok") {
           console.log(data.data);

@@ -2,11 +2,9 @@
   "name": "client",
   "version": "1.0.0",
   "scripts": {
-    "start": "expo start --tunnel -c",
-    "android": "expo start -c --android",
-    "ios": "expo start -c --tunnel --ios",
-    "web": "expo start -c --web",
-    "test": "jest --watchAll"
+    "start": "NODE_ENV=development expo start --tunnel -c",
+    "android": "NODE_ENV=development expo start -c --android",
+    "ios": "NODE_ENV=development expo start -c --tunnel --ios"
   },
   "jest": {
     "preset": "jest-expo"
@@ -47,8 +45,8 @@
     "@babel/core": "^7.20.0",
     "@types/react": "~18.0.14",
     "babel-plugin-module-resolver": "^5.0.0",
-    "jest": "^29.2.1",
-    "jest-expo": "~48.0.0",
+    "prettier": "^3.0.0",
+    "prettier-plugin-tailwindcss": "^0.4.0",
     "react-test-renderer": "18.2.0",
     "tailwindcss": "^3.3.2",
     "typescript": "^4.9.4"

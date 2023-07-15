@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet } from "react-native";
 import { Link } from "@react-navigation/native";
 import { Icon } from "react-native-elements";
+import React from "react";
 
 import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
@@ -33,26 +34,26 @@ const Login = ({ navigation, route }: any) => {
   };
 
   async function openBrowser(url: string) {
-    const callback = Linking.createURL("App", { scheme: "exp" });
+    const callback = Linking.createURL("login", { scheme: "exp" });
+    console.log(url);
     console.log(callback);
     const response = await WebBrowser.openAuthSessionAsync(url, callback);
-    //   dismissButtonStyle: "close",
-    //   controlsColor: "#f5f5f5",
-    //   toolbarColor: "#000",
-    // });
 
-    if (response && response.type === "cancel") {
-      console.log("cancelled by user");
-      return;
-    }
+    if (response && response.type === "cancel") return;
 
-    if (response.type === "success") {
-      const queryParams = response.url
+    if (response && response.type === "success") {
+      const {
+        userId: id,
+        username,
+        name,
+        email,
+        ...queryParams
+      } = response.url
         .split("?")[1]
         .split("&")
         .reduce<AuthType>(
-          (prev, cur) => {
-            const [key, value] = cur.split("=");
+          (prev, curr) => {
+            const [key, value] = curr.split("=");
 
             prev[key as keyof AuthType] = value;
             return prev;
@@ -61,10 +62,23 @@ const Login = ({ navigation, route }: any) => {
             at: "",
             rt: "",
             userId: "",
-          }
+            username: "",
+            email: "",
+            name: "",
+          },
         );
 
-      await oauthLogin({ ...queryParams });
+      console.log(queryParams.rt);
+
+      await oauthLogin({
+        ...queryParams,
+        user: {
+          id,
+          username,
+          name,
+          email,
+        },
+      });
 
       navigation.navigate("screens/tabs/index");
     }

@@ -4,12 +4,12 @@ import React from "react";
 import { useAuthStore } from "../../../stores";
 
 const Home = () => {
-  const { at, rt, userId } = useAuthStore();
+  const { at, rt, user } = useAuthStore();
 
   return (
     <View>
       <Text>home</Text>
-      <Text>{userId}</Text>
+      <Text>{user?.id}</Text>
     </View>
   );
 };

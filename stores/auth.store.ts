@@ -4,30 +4,66 @@ import axios from "axios";
 import type { Login, Response } from "@utils/types";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
 
 type OAuth = {
   at: string;
   rt: string;
-  userId: string;
+  user: {
+    id: string;
+    username: string;
+    name: string;
+    email?: string;
+  };
 };
 
 export type AuthStore = {
-  at: string;
-  rt: string;
-  userId: string;
-  login: (
-    username: string,
-    password: string
-  ) => Promise<{ success: boolean; message?: string }>;
-  oauthLogin: ({ at, rt, userId }: OAuth) => Promise<void>;
+  at: () => string;
+  rt: () => string;
+  setAt: (at: string) => Promise<void>;
+  setRt: (rt: string) => Promise<void>;
+  user?: {
+    id: string;
+    username: string;
+    name: string;
+    email?: string;
+  } | null;
+  login: (username: string, password: string) => Promise<{ success: boolean }>;
+  oauthLogin: ({ at, rt, user }: OAuth) => Promise<void>;
   logout: () => Promise<void>;
   refreshTokens: () => Promise<void>;
 };
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
-  at: "",
-  rt: "",
-  userId: "",
+  at: () => {
+    const [at, setAt] = useState("");
+
+    useEffect(() => {
+      const getAt = async () => {
+        setAt((await AsyncStorage.getItem("at")) ?? "");
+      };
+
+      getAt();
+    });
+
+    return at;
+  },
+  rt: () => {
+    const [rt, setRt] = useState("");
+
+    useEffect(() => {
+      const getRt = async () => {
+        setRt((await AsyncStorage.getItem("rt")) ?? "");
+      };
+
+      getRt();
+    });
+
+    return rt;
+  },
+  setAt: async (at) => AsyncStorage.setItem("at", at),
+  setRt: async (rt) => AsyncStorage.setItem("rt", rt),
+  user: null,
   login: async (username, password) => {
     const { data } = await axios.post<Response<Login>>(
       `${API_URL}/auth/login`,
@@ -40,21 +76,20 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-      }
+      },
     );
 
     if (data.status === "ok") {
-      const { at, rt, userId } = data.data;
+      const { at, rt, user } = data.data;
+      const { setAt, setRt } = get();
+      await Promise.all([setAt(at), setRt(rt)]);
       set({
-        at,
-        rt,
-        userId,
+        user,
       });
 
       await new Promise((resolve) => {
         AsyncStorage.setItem("at", at);
         AsyncStorage.setItem("rt", rt);
-        AsyncStorage.setItem("userId", userId);
         resolve(true);
       });
 
@@ -63,11 +98,20 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
     return { success: false, message: data.message };
   },
-  oauthLogin: async ({ at, rt, userId }) => {
+  oauthLogin: async ({ at, rt, user: currentUser }) => {
+    const { setAt, setRt } = get();
+    await Promise.all([setAt(at), setRt(rt)]);
     set({
-      at,
-      rt,
-      userId,
+      user: {
+        ...currentUser,
+        email: currentUser?.email ?? "",
+      },
+    });
+
+    await new Promise((resolve) => {
+      AsyncStorage.setItem("at", at);
+      AsyncStorage.setItem("rt", rt);
+      resolve(true);
     });
   },
   logout: async () => {},
@@ -82,14 +126,20 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
           Accept: "application/json",
           Authorization: `Bearer ${rt}`,
         },
-      }
+      },
     );
 
     if (data.status === "ok") {
+      const { at, rt, user: currentUser } = data.data;
       const { oauthLogin } = get();
 
       oauthLogin({
-        ...data.data,
+        at,
+        rt,
+        user: {
+          ...currentUser,
+          email: currentUser?.email ?? "",
+        },
       });
     }
   },
